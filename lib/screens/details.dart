@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class DetailsPage extends StatelessWidget {
   final String title;
@@ -18,7 +19,7 @@ class DetailsPage extends StatelessWidget {
               title,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            Text(body, style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+            Html(data: """ <p><i> $body </i></p> """),
           ],
         ),
       ),
