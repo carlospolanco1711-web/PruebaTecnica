@@ -37,10 +37,16 @@ class _NewsListScreenState extends State<NewsListScreen> {
   void initState() {
     super.initState();
     _fetchPosts();
+    filteredposts = posts;
   }
 
   void _filteredPosts (String query){
-    
+    final result = posts.where((post){
+    final title = post['title'].toString().toLowerCase();
+    final result = query;
+    return result.contains(title);
+    }).toList();
+
   }
 
   Future<void> _fetchPosts() async {
@@ -80,8 +86,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
               ),
-              onChanged: (value) {
-                // TODO: Implementar lógica de filtrado
+              onChanged: (void value) {
+                _filteredPosts;
               },
             ),
           ),
@@ -89,9 +95,9 @@ class _NewsListScreenState extends State<NewsListScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: posts.length,
+                    itemCount: filteredposts.length,
                     itemBuilder: (context, index) {
-                      final post = posts[index];
+                      final post = filteredposts[index];
                       return _buildNewsItem(post['title'], post['body']);
                     },
                   ),
