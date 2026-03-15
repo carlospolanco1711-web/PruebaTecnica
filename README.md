@@ -26,23 +26,24 @@ Esta aplicación es funcional tanto en Android como iOS gracias a Flutter.
 
 ### Home
 
-    ![Inicio-Android](assets/images/home_android.png)
-    ![Inicio-Iphone](assets/images/home_iphone.png)
+![Inicio-Android](assets/images/home_android.png)
+![Inicio-Iphone](assets/images/home_iphone.png)
 
 ### Detalles
 
-    ![Detalles-Android](assets/images/details_android.png)
-    ![Detalles-Iphone](assets/images/details_android.png)
+![Detalles-Android](assets/images/details_android.png)
+![Detalles-Iphone](assets/images/details_android.png)
 
 ### Favoritos
 
-    ![Favoritos-Android](assets/images/favorites_android.png)
-    ![Favoritos-Iphone](assets/images/favorites_iphone.png)
+![Favoritos-Android](assets/images/favorites_android.png)
+![Favoritos-Iphone](assets/images/favorites_iphone.png)
 
 ### Busqueda
 
-    ![Busqueda-Android](assets/images/browse_android.png)
-    ![Busqueda-Iphone](assets/images/browse_iphone.png)
+![Busqueda-Android](assets/images/browse_android.png)
+![Busqueda-Iphone](assets/images/browse_iphone.png)
+
 
 ## Instalación
 
