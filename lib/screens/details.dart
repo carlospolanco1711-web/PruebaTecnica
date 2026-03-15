@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+<<<<<<< HEAD
 import 'package:shared_preferences/shared_preferences.dart';
+=======
+>>>>>>> 3a3c7d3438662438931a0b956ab78180528b5c00
 
 class DetailsPage extends StatefulWidget {
   final int id;
@@ -69,7 +72,11 @@ class _DetailsPageState extends State<DetailsPage> {
               widget.title,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
+<<<<<<< HEAD
             Html(data: "<p>${widget.body}</p>"),
+=======
+            Html(data: """ <p><i> $body </i></p> """),
+>>>>>>> 3a3c7d3438662438931a0b956ab78180528b5c00
           ],
         ),
       ),

@@ -38,7 +38,20 @@ class _NewsListScreenState extends State<NewsListScreen> {
   void initState() {
     super.initState();
     _fetchPosts();
+<<<<<<< HEAD
     _loadFavorites();
+=======
+    filteredposts = posts;
+  }
+
+  void _filteredPosts (String query){
+    final result = posts.where((post){
+    final title = post['title'].toString().toLowerCase();
+    final result = query;
+    return result.contains(title);
+    }).toList();
+
+>>>>>>> 3a3c7d3438662438931a0b956ab78180528b5c00
   }
 
   Future<void> _fetchPosts() async {
@@ -118,8 +131,13 @@ class _NewsListScreenState extends State<NewsListScreen> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
               ),
+<<<<<<< HEAD
               onChanged: (value) {
                 _filteredPosts(value);
+=======
+              onChanged: (void value) {
+                _filteredPosts;
+>>>>>>> 3a3c7d3438662438931a0b956ab78180528b5c00
               },
             ),
           ),
@@ -130,11 +148,15 @@ class _NewsListScreenState extends State<NewsListScreen> {
                     itemCount: filteredposts.length,
                     itemBuilder: (context, index) {
                       final post = filteredposts[index];
+<<<<<<< HEAD
                       return _buildNewsItem(
                         post['id'],
                         post['title'],
                         post['body'],
                       );
+=======
+                      return _buildNewsItem(post['title'], post['body']);
+>>>>>>> 3a3c7d3438662438931a0b956ab78180528b5c00
                     },
                   ),
           ),
