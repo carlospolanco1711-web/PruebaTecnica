@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:prueba_tecnica/screens/details.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Keahak News Challenge',
+      title: 'News Challenge',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const NewsListScreen(),
     );
@@ -28,7 +29,7 @@ class NewsListScreen extends StatefulWidget {
 
 class _NewsListScreenState extends State<NewsListScreen> {
   late String apiSecret = '';
-
+  Set<int> favoritos = {};
   List<dynamic> posts = [];
   List<dynamic> filteredposts = [];
   bool isLoading = false;
@@ -37,10 +38,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
   void initState() {
     super.initState();
     _fetchPosts();
-  }
-
-  void _filteredPosts (String query){
-    
+    _loadFavorites();
   }
 
   Future<void> _fetchPosts() async {
@@ -51,9 +49,10 @@ class _NewsListScreenState extends State<NewsListScreen> {
         headers: {'Accept': 'application/json', 'User-Agent': 'Mozilla'},
       );
 
-
       if (response.statusCode == 200) {
-          final  data = List<Map<String, dynamic>>.from(json.decode(response.body));
+        final data = List<Map<String, dynamic>>.from(
+          json.decode(response.body),
+        );
         setState(() {
           posts = data;
           filteredposts = data;
@@ -66,10 +65,49 @@ class _NewsListScreenState extends State<NewsListScreen> {
     }
   }
 
+  void _filteredPosts(String query) {
+    final results = posts.where((post) {
+      final title = post['title'].toString().toLowerCase();
+      final body = post['body'].toString().toLowerCase();
+      final search = query.toLowerCase();
+      return title.contains(search) || body.contains(search);
+    }).toList();
+
+    setState(() {
+      filteredposts = results;
+    });
+  }
+
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final favList = prefs.getStringList('favorites') ?? [];
+
+    setState(() {
+      favoritos = favList.map((e) => int.parse(e)).toSet();
+    });
+  }
+
+  Future<void> _toggleFavorite(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      if (favoritos.contains(id)) {
+        favoritos.remove(id);
+      } else {
+        favoritos.add(id);
+      }
+    });
+
+    prefs.setStringList(
+      'favorites',
+      favoritos.map((e) => e.toString()).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('News Feed - Key: $apiSecret')),
+      appBar: AppBar(title: Text('News Feed $apiSecret')),
       body: Column(
         children: [
           Padding(
@@ -81,7 +119,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
-                // TODO: Implementar lógica de filtrado
+                _filteredPosts(value);
               },
             ),
           ),
@@ -89,10 +127,14 @@ class _NewsListScreenState extends State<NewsListScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: posts.length,
+                    itemCount: filteredposts.length,
                     itemBuilder: (context, index) {
-                      final post = posts[index];
-                      return _buildNewsItem(post['title'], post['body']);
+                      final post = filteredposts[index];
+                      return _buildNewsItem(
+                        post['id'],
+                        post['title'],
+                        post['body'],
+                      );
                     },
                   ),
           ),
@@ -101,13 +143,20 @@ class _NewsListScreenState extends State<NewsListScreen> {
     );
   }
 
-  Widget _buildNewsItem(String title, String body) {
+  Widget _buildNewsItem(int id, String title, String body) {
+    final isFavorite = favoritos.contains(id);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailsPage(title: title, body: body),
+            builder: (context) => DetailsPage(
+              id: id,
+              title: title,
+              body: body,
+              isFavorite: favoritos.contains(id),
+            ),
           ),
         );
       },
@@ -127,6 +176,16 @@ class _NewsListScreenState extends State<NewsListScreen> {
                     fontSize: 16,
                   ),
                 ),
+              ),
+
+              IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: Colors.red,
+                ),
+                onPressed: () {
+                  _toggleFavorite(id);
+                },
               ),
             ],
           ),

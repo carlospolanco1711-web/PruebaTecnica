@@ -1,24 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class DetailsPage extends StatelessWidget {
+class DetailsPage extends StatefulWidget {
+  final int id;
   final String title;
   final String body;
+  final bool isFavorite;
 
-  const DetailsPage({super.key, required this.title, required this.body});
+  const DetailsPage({
+    super.key,
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.isFavorite,
+  });
+
+  @override
+  State<DetailsPage> createState() => _DetailsPageState();
+}
+
+class _DetailsPageState extends State<DetailsPage> {
+  late bool isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = widget.isFavorite;
+  }
+
+  Future<void> toggleFavorite() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> favorites = prefs.getStringList('favorites') ?? [];
+
+    setState(() {
+      if (isFavorite) {
+        favorites.remove(widget.id.toString());
+        isFavorite = false;
+      } else {
+        favorites.add(widget.id.toString());
+        isFavorite = true;
+      }
+    });
+
+    await prefs.setStringList('favorites', favorites);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pagina de detalles')),
+      appBar: AppBar(
+        title: const Text('Details'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: Colors.red,
+            ),
+            onPressed: toggleFavorite,
+          ),
+        ],
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Text(
-              title,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              widget.title,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            Text(body, style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
+            Html(data: "<p>${widget.body}</p>"),
           ],
         ),
       ),
