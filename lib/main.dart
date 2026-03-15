@@ -3,19 +3,52 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:prueba_tecnica/screens/details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:prueba_tecnica/screens/favorites.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  int currentIndex = 0;
+
+  final screens = [const NewsListScreen(), const FavoritesScreen()];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'News Challenge',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: const NewsListScreen(),
+
+      home: Scaffold(
+        body: screens[currentIndex],
+
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: currentIndex,
+
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: "Favorites",
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -29,9 +62,11 @@ class NewsListScreen extends StatefulWidget {
 
 class _NewsListScreenState extends State<NewsListScreen> {
   late String apiSecret = '';
+
   Set<int> favoritos = {};
   List<dynamic> posts = [];
   List<dynamic> filteredposts = [];
+
   bool isLoading = false;
 
   @override
@@ -43,6 +78,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
   Future<void> _fetchPosts() async {
     setState(() => isLoading = true);
+
     try {
       final response = await http.get(
         Uri.parse('https://jsonplaceholder.typicode.com/posts'),
@@ -53,6 +89,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
         final data = List<Map<String, dynamic>>.from(
           json.decode(response.body),
         );
+
         setState(() {
           posts = data;
           filteredposts = data;
@@ -61,6 +98,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       }
     } catch (e) {
       debugPrint('Error al cargar datos: $e');
+
       setState(() => isLoading = false);
     }
   }
@@ -70,6 +108,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final title = post['title'].toString().toLowerCase();
       final body = post['body'].toString().toLowerCase();
       final search = query.toLowerCase();
+
       return title.contains(search) || body.contains(search);
     }).toList();
 
@@ -80,6 +119,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
   Future<void> _loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();
+
     final favList = prefs.getStringList('favorites') ?? [];
 
     setState(() {
@@ -108,28 +148,34 @@ class _NewsListScreenState extends State<NewsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('News Feed $apiSecret')),
+
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
+
             child: TextField(
               decoration: const InputDecoration(
                 labelText: 'Buscar noticia...',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
               ),
+
               onChanged: (value) {
                 _filteredPosts(value);
               },
             ),
           ),
+
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     itemCount: filteredposts.length,
+
                     itemBuilder: (context, index) {
                       final post = filteredposts[index];
+
                       return _buildNewsItem(
                         post['id'],
                         post['title'],
@@ -150,6 +196,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       onTap: () {
         Navigator.push(
           context,
+
           MaterialPageRoute(
             builder: (context) => DetailsPage(
               id: id,
@@ -160,17 +207,23 @@ class _NewsListScreenState extends State<NewsListScreen> {
           ),
         );
       },
+
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+
         child: Container(
           padding: const EdgeInsets.all(15),
+
           child: Row(
             children: [
               const Icon(Icons.article, size: 40, color: Colors.blue),
+
               const SizedBox(width: 10),
+
               Expanded(
                 child: Text(
                   title,
+
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -183,6 +236,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                   isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: Colors.red,
                 ),
+
                 onPressed: () {
                   _toggleFavorite(id);
                 },
